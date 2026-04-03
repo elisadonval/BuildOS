@@ -1,0 +1,22 @@
+Update Summary: 2026-04-03
+Project Structure: Introduced project folders for code:. 
+/constant contains theme.js for aesthetics 
+/components contains dashboard.js, projecthub.js, equipment.js for each page and also sidebar.js and header.js for formatting.
+i guess actually theres also a pages folder so maybe these: dashboard.js, projecthub.js, equipment.js should be moved there in future
+
+Dashboard Layout: Refreshed the interface with a new 3-column grid for better data density.
+
+Labor Widget: Added a "Labor Information" section including crew management and Day Shift (8:00 AM – 4:00 PM) toggles.
+
+Security: Introduced a login function (Password: Group4; any username accepted).
+
+Weather Sync: Synchronized the dashboard weather widget with the Milano Bergamo EPW dataset. (uploaded to public folder: /public/weather/milano bergamo.epw)
+
+Project Hub: Developed dedicated project pages so there is one backend page to edit each project and one main page for creating new projects or going into specific projects already set up.
+
+Note: Several new dashboard widgets currently serve as visual placeholders without backend logic.
+
+Next Steps
+Build Functionality: Transition visual placeholders into active, functioning components.
+
+Dataset Integration: Attach external datasets for automated mapping of project tasks and worker types.
