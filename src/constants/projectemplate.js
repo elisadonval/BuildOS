@@ -1,7 +1,6 @@
 import libraryData from './master_dataset.json';
 
-// 1. THE DEFINITIVE PROJECT STRUCTURE
-const PROJECT_MAP = {
+export const PROJECT_MAP = {
   "Substructure": ["Excavation", "Piling & Shoring", "Foundations", "Water Proofing", "Retaining Wall"],
   "Superstructure": ["Columns & Beams", "Floor Slab", "Core Construction", "Roof structure"],
   "Building Envelope": ["External Wall", "Roofing", "Glazing", "Windows & Doors"],
@@ -11,48 +10,125 @@ const PROJECT_MAP = {
   "Testing, Commissioning & Handover": ["Testing & Balancing", "Electrical Certification", "Snagging", "Final Inspection", "Practical Completion"]
 };
 
-// 2. THE DRIVER ASSIGNMENT (Keeping the logic separate from the data)
-const getDriverForTask = (taskName) => {
-  const wallTasks = ["External Wall", "Building Envelope"];
-  const windowTasks = ["Glazing", "Windows & Doors"];
-  const storeyTasks = ["Electrical Installation", "Bathroom Installation", "Kitchen & Appliances", "Second Fix MEP", "Fire Sprinklers", "Elevators", "Internal Partitioning"];
-  
-  if (wallTasks.includes(taskName)) return "wallArea";
-  if (windowTasks.includes(taskName)) return "windowArea";
-  if (storeyTasks.includes(taskName)) return "storeys";
-  return "gia"; 
+// ADD THIS EXPORT BLOCK AT THE TOP: This provides the baseline values your dropdown needs
+export const TYPOLOGY_BASELINES = {
+  "Single Family Home": { gia: 200, storeys: 2, wallArea: 0, windowArea: 0 },
+  "Apartment Building": { gia: 3000, storeys: 5, wallArea: 0, windowArea: 0 },
+  "Office": { gia: 5000, storeys: 8, wallArea: 0, windowArea: 0 },
+  "School": { gia: 2500, storeys: 3, wallArea: 0, windowArea: 0 }
 };
 
-export const generateSmartTemplate = () => {
-  const template = {};
+/**
+ * 1. AUTOMATED GEOMETRY & TYPOLOGY DERIVATION RULE
+ */
+export const calculateDerivedParameters = (projectData) => {
+  const typology = projectData.typology || 'Single Family Home';
+  
+  // Use the dictionary definition to protect calculations if numbers are missing
+  const defaults = TYPOLOGY_BASELINES[typology] || TYPOLOGY_BASELINES["Single Family Home"];
 
-  Object.entries(PROJECT_MAP).forEach(([phase, tasks]) => {
-    template[phase] = {};
-    
-    tasks.forEach(taskName => {
-      // SURGICAL MATCH: Find items where item.Task is EXACTLY the taskName
-      const matchingItems = libraryData.filter(item => item.Task === taskName);
+  const gia = parseFloat(projectData.gia !== undefined ? projectData.gia : defaults.gia) || 0;
+  const storeys = parseFloat(projectData.storeys !== undefined ? projectData.storeys : defaults.storeys) || 1;
 
-      if (matchingItems.length > 0) {
-        // Take 1/4 of the products as requested
-        const sampleSize = Math.max(1, Math.floor(matchingItems.length * 0.25));
-        const sampled = matchingItems.slice(0, sampleSize);
+  let derivedWallArea = 0;
+  if (gia > 0 && storeys > 0) {
+    const footprintArea = gia / storeys;
+    const sideLength = Math.sqrt(footprintArea);
+    derivedWallArea = Math.round(4 * sideLength * 3.5 * storeys);
+  }
 
-        template[phase][taskName] = sampled.map(item => ({
-          code: item.Code,
-          name: item.Identifier,
-          unit: item["U.M."],
-          price: item["Price (€)"],
-          driver: getDriverForTask(taskName),
-          factor: 1.0 
-        }));
-      } else {
-        // This will tell us EXACTLY which tasks are failing to find their data
-        console.error(`DATA MISMATCH: Task "${taskName}" has 0 products in master_dataset.json`);
+  const windowCoverageRatios = {
+    "Single Family Home": 0.25,
+    "Apartment Building": 0.30,
+    "Office": 0.50,
+    "School": 0.35
+  };
+  const ratio = windowCoverageRatios[typology] || 0.25;
+  const derivedWindowArea = Math.round(derivedWallArea * ratio);
+
+  const finalWallArea = (projectData.wallArea === 0 || !projectData.wallArea) ? derivedWallArea : parseFloat(projectData.wallArea);
+  const finalWindowArea = (projectData.windowArea === 0 || !projectData.windowArea) ? derivedWindowArea : parseFloat(projectData.windowArea);
+
+  return {
+    ...projectData,
+    typology,
+    gia,
+    storeys,
+    wallArea: finalWallArea,
+    windowArea: finalWindowArea
+  };
+};
+
+export const getItemQuantity = (item, projectData) => {
+  // 1. FORCE THE ENGINE TO CHECK IF THIS ITEM ACTUALLY EXISTS IN OUR SLICED TEMPLATE
+  let itemExistsInTemplate = false;
+  Object.values(BASE_PROJECT_TEMPLATE).forEach(tasksObj => {
+    Object.values(tasksObj).forEach(itemsArray => {
+      if (itemsArray.some(tItem => tItem.code === item.Code)) {
+        itemExistsInTemplate = true;
       }
     });
   });
 
+  if (!itemExistsInTemplate && item.Category !== 'Labor') {
+    return 0;
+  }
+  
+  const params = calculateDerivedParameters(projectData);
+  
+  const category = item.Category || '';
+  if (category === 'Labor') {
+    return 6; 
+  }
+
+  const unit = (item["U.M."] || item.Unit || '').toLowerCase().trim();
+  const isM2 = unit.includes('m2') || unit.includes('m²');
+  const identifierLower = (item.Identifier || '').toLowerCase();
+
+  if (isM2) {
+    if (identifierLower.includes('window') || identifierLower.includes('glaz')) {
+      const primaryWindow = "bottom-hung window in natural oak";
+      return identifierLower === primaryWindow ? (params.windowArea || 0) : 0;
+    }
+
+    if (identifierLower.includes('insulation')) {
+      const primaryInsulation = "rock wool insulation panel";
+      return identifierLower === primaryInsulation ? (params.wallArea || 0) : 0;
+    }
+
+    if (identifierLower.includes('wall') || identifierLower.includes('facade') || identifierLower.includes('partition')) {
+      return params.wallArea || 0;
+    }
+
+    return params.gia / params.storeys;
+  }
+
+  return 0; 
+};
+
+/**
+ * 3. SPLIT SAMPLING TEMPLATE GENERATOR
+ */
+export const generateSmartTemplate = () => {
+  const template = {};
+  Object.entries(PROJECT_MAP).forEach(([phase, tasks]) => {
+    template[phase] = {};
+    tasks.forEach(taskName => {
+      const matchingItems = libraryData.filter(item => item.Task === taskName);
+      if (matchingItems.length > 0) {
+        const sampleRatio = (taskName === "Landscaping") ? 0.125 : 0.20;
+        const sampleSize = Math.max(1, Math.floor(matchingItems.length * sampleRatio));
+        
+        template[phase][taskName] = matchingItems.slice(0, sampleSize).map(item => ({
+          code: item.Code,
+          name: item.Identifier,
+          unit: item["U.M."],
+          price: item["Price (€)"],
+          factor: 1.0 
+        }));
+      }
+    });
+  });
   return template;
 };
 
@@ -60,13 +136,8 @@ export const BASE_PROJECT_TEMPLATE = generateSmartTemplate();
 
 export const getInitialQuantities = (projectData) => {
   const initialQty = {};
-  Object.values(BASE_PROJECT_TEMPLATE).forEach(phase => {
-    Object.values(phase).forEach(taskItems => {
-      taskItems.forEach(item => {
-        const multiplier = projectData[item.driver] || projectData.gia;
-        initialQty[item.code] = multiplier * (item.factor || 1);
-      });
-    });
+  libraryData.forEach(item => {
+    initialQty[item.Code] = getItemQuantity(item, projectData);
   });
   return initialQty;
 };

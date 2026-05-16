@@ -1,423 +1,388 @@
-import React, { useState, useEffect } from 'react';
-import { CloudSun, Users, Maximize, Layers, Warehouse, Box, Check } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { 
+  CloudSun, Users, MapPin, TrendingUp, ExternalLink, 
+  Timer, Thermometer, Wind, Droplets, Zap, Maximize, Layers, Warehouse, Box, 
+  Building2, HardHat, Calendar, Clock, 
+  ArrowRight, ShieldCheck, Construction, 
+  Ruler, Home, Edit3, RefreshCw, Info,
+  TrendingDown, AlertTriangle, Save, Plus,
+  Target, BarChart3, ChevronRight 
+} from 'lucide-react';
 import { THEME } from '../constants/theme';
 import libraryData from '../constants/master_dataset.json';
 
-const selectStyle = {
- width: '90%', padding: '12px', borderRadius: '10px',
- border: `1px solid ${THEME.border}`, backgroundColor: '#fcfbf8',
- fontWeight: '600', outline: 'none'
-};
-
-const LABOR_PRICE_MAP = libraryData
- .filter(i => i.Category === 'Labor')
- .reduce((acc, i) => {
-  const key = `${i.Task}||${i.Identifier}`;
-  if (!acc[key]) acc[key] = i['Price (€)'];
-  return acc;
- }, {});
-
-const ROLE_PRICE_MAP = libraryData
- .filter(i => i.Category === 'Labor')
- .reduce((acc, i) => {
-  if (!acc[i.Identifier]) acc[i.Identifier] = i['Price (€)'];
-  return acc;
- }, {});
-
-const getWage = (task, role) =>
- LABOR_PRICE_MAP[`${task}||${role}`] ?? ROLE_PRICE_MAP[role] ?? 0;
-
-const HOURS_PER_DAY = 6;
-
 const Dashboard = ({
- cardStyle, inputStyle, projectData, setProjectData,
- grandTotal, setActiveTab,
- phases, currentPhase, setSelectedPhaseId,
- labourItems, onSave, lastSaved
+  cardStyle, projectData, setProjectData,
+  grandTotal, phases, projectStatus, setProjectStatus,
+  overrunDays, setOverrunDays, onSave
 }) => {
- const [weather, setWeather] = useState({ temp: "24", condition: "Partly Cloudy" });
- const [projectStatus, setProjectStatus] = useState('Active');
- const [resourceRows, setResourceRows] = useState([]);
- 
- // State for the new Variation Bar
- const [variationInput, setVariationInput] = useState({
-  task: '',
-  type: '',
-  count: 1,
-  number: 1
- });
-
- const selectedPhaseCost = currentPhase?.totalCost || 0;
- // Calculate variance: Baseline (expected) vs Actual (assigned workers)
-  const totalLabourActual = resourceRows.reduce((sum, item) => 
-    sum + ((item.number || 1) * (item.count || 0) * HOURS_PER_DAY * (item.wage || 0)), 0
-  );
-  
-  // Baseline vs Actual calculation
-  // The baseline should be the cost of 1 person/day for every task in the phase
-  const baseline = labourItems.reduce((sum, i) => sum + (1 * 1 * HOURS_PER_DAY * getWage(i.task, i.identifier)), 0); 
-  const variance = baseline - totalLabourActual;
-  const isSaving = variance >= 0;
-  // Calculate how many of the 6 icons to highlight
-  // 3 icons = Exactly on budget (50%)
-  // 6 icons = Max savings
-  // 0 icons = Significant overage
-  const budgetRatio = baseline > 0 ? (variance / baseline) : 0;
-  const highlightCount = Math.max(0, Math.min(6, 3 + Math.round(budgetRatio * 6)));
-
- const phaseLabel = currentPhase?.name ? currentPhase.name.toUpperCase() : "PHASE";
- const allRoles = labourItems ? [...new Set(labourItems.map(i => i.identifier))] : [];
- const allTasks = labourItems ? [...new Set(labourItems.map(i => i.task))] : [];
- const statusColors = {'Active': THEME.success,'On Hold': THEME.medium,'Work Stopped': THEME.danger};
-
- useEffect(() => {
-  if (labourItems && labourItems.length > 0) {
-   const seen = new Set();
-   const rows = labourItems
-    .filter(i => {
-     const key = `${i.task}||${i.identifier}`;
-     if (seen.has(key)) return false;
-     seen.add(key);
-     return true;
-    })
-    .map(i => ({
-     task: i.task,
-     type: i.identifier,
-     count: i.hours || 1,
-     number: 1,
-     wage: getWage(i.task, i.identifier)
-    }));
-   setResourceRows(rows);
-  } else {
-   setResourceRows([{ task: '', type: '', count: 1, number: 1, wage: 0 }]);
-  }
-  
-  // Set default role for variation bar
-  if (allRoles.length > 0) {
-    setVariationInput(prev => ({ ...prev, type: allRoles[0] }));
-  }
- }, [currentPhase?.id]);
-
- const updateRow = (idx, field, value) =>
-  setResourceRows(prev => {
-   const updated = prev.map((r, i) => {
-    if (i !== idx) return r;
-    const u = { ...r, [field]: value };
-    if (field === 'task' || field === 'type') {
-     u.wage = getWage(field === 'task' ? value : r.task, field === 'type' ? value : r.type);
-    }
-    return u;
-   });
-   return updated;
+  const [city, setCity] = useState('Milan');
+  const [weather, setWeather] = useState({ 
+    temp: "22", condition: "Sunny", wind: "10km/h", humidity: "45%", forecast: "Clear Skies" 
   });
 
- const handleAddVariation = () => {
-  if (!variationInput.task) return;
-  const newRow = { 
-   ...variationInput, 
-   wage: getWage(variationInput.task, variationInput.type) 
-  };
-  setResourceRows(prev => [newRow, ...prev]); // Adds to top of list
-  setVariationInput({ task: '', type: allRoles[0] || '', count: 1, number: 1 });
- };
+  useEffect(() => {
+    const lombardiaWeatherData = {
+      'Milan': { temp: "22", wind: "8km/h", humidity: "48%", forecast: "Clear Skies" },
+      'Bergamo': { temp: "19", wind: "14km/h", humidity: "55%", forecast: "Mountain Breeze" },
+      'Brescia': { temp: "21", wind: "11km/h", humidity: "52%", forecast: "Partly Cloudy" },
+      'Como': { temp: "18", wind: "18km/h", humidity: "65%", forecast: "Lake Mist" },
+      'Monza': { temp: "23", wind: "9km/h", humidity: "46%", forecast: "Sunny" },
+      'Varese': { temp: "17", wind: "20km/h", humidity: "60%", forecast: "Gusty Winds" }
+    };
+    if (lombardiaWeatherData[city]) setWeather(prev => ({ ...prev, ...lombardiaWeatherData[city] }));
+  }, [city]);
 
- const removeRow = (idx) =>
-  setResourceRows(prev => prev.filter((_, i) => i !== idx));
-
- const RESOURCE_GRID_LAYOUT = {
-  display: 'grid',
-  gridTemplateColumns: '150px 210px 60px 60px 60px 75px 70px',
-  gap: '30px', // This creates the uniform buffer between every box
-  alignItems: 'left',
-  width: '100%'
- };
-
- return (
-  <div style={{ 
-   display: 'grid', 
-   gridTemplateColumns: '3fr 2fr 1fr', 
-   gap: '30px', 
-   alignItems: 'stretch', 
-   height: 'calc(100vh - 120px)',
-   padding: '0 0 100px 0',
-   margin: '0 auto 100px',
-   boxSizing: 'border-box'
-  }}>
-   
-   {/* LEFT & MIDDLE COLUMNS */}
-   <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '25px', minHeight: 0 }}>
-    
-    {/* TOP ROW WIDGETS */}
-    <div style={{ display: 'flex', gap: '25px', flexShrink: 0 }}>
-     <div style={{ ...cardStyle, flex: 1, borderLeft: `6px solid ${THEME.primary}`, padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-      <h3 style={{ margin: 0, fontSize: '10px', color: THEME.muted, textTransform: 'uppercase' }}>Current Project Phase</h3>
-      <div style={{ backgroundColor: THEME.background, borderRadius: '12px', padding: '2px 8px', border: `1px solid ${THEME.border}`, marginTop: '8px' }}>
-       <select
-        style={{ width: '100%', border: 'none', background: 'transparent', fontSize: '15px', fontWeight: '800', color: THEME.sidebar, outline: 'none', cursor: 'pointer', padding: '8px 0' }}
-        value={currentPhase?.id}
-        onChange={(e) => setSelectedPhaseId(parseInt(e.target.value))}
-       >
-        {phases.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-       </select>
-      </div>
-      <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-       <span style={{ fontSize: '10px', color: THEME.muted, fontWeight: '700' }}>Project Status:</span>
-       <select 
-  value={projectStatus} 
-  onChange={(e) => setProjectStatus(e.target.value)} 
-  style={{ 
-    fontSize: '10px', 
-    fontWeight: '900', 
-    border: 'none', 
-    background: 'none', 
-    cursor: 'pointer', 
-    outline: 'none', 
-    textAlign: 'right', 
-    /* Dynamically picks the color from THEME based on the current state */
-    color: statusColors[projectStatus] || THEME.muted 
-  }}
->
-  <option value="Active">● ACTIVE</option>
-  <option value="On Hold">● ON HOLD</option>
-  <option value="Work Stopped">● WORK STOPPED</option>
-</select>
-      </div>
-     </div>
-
-     <div style={{ ...cardStyle, flex: 1, textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'center', borderTop: `4px solid ${THEME.primary}`, padding: '20px' }}>
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '12px' }}>
-  {[1, 2, 3, 4, 5, 6].map((i) => (
-    <Users 
-      key={i} 
-      size={18} 
-      color={i <= highlightCount ? (isSaving ? THEME.success : THEME.primary) : '#e2e8f0'} 
-      style={{ transition: 'color 0.3s ease' }}
-    />
-  ))}
-</div>
-<h2 style={{ margin: 0, color: isSaving ? THEME.success : THEME.danger, fontSize: '24px', fontWeight: '800' }}>
-  {isSaving ? '€' + Math.abs(variance).toLocaleString() + ' Saved' : '€' + Math.abs(variance).toLocaleString() + ' Over'}
-</h2>
-<p style={{ margin: 0, fontSize: '12px', color: THEME.muted, fontWeight: '700' }}>
-  Total Labour: €{totalLabourActual.toLocaleString()}
-</p>
-     </div>
-    </div>
-
-    {/* RESOURCE MANAGER */}
-<div style={{ 
-  ...cardStyle, 
-  flex: 1, 
-  display: 'flex', 
-  flexDirection: 'column', 
-  minHeight: 0, 
-  overflow: 'hidden', 
-  borderTop: `4px solid ${THEME.black}`,
-  padding: '0px' // FORCE zero padding on the main container
-}}>
+  const burnPerDay = grandTotal * 0.0008;
+  const riskExposure = overrunDays > 0 ? (overrunDays * burnPerDay) : 0;
+  const currentTotalValuation = grandTotal + riskExposure;
   
-  {/* 1. Header Section */}
-  <div style={{ 
-    display: 'flex', 
-    justifyContent: 'space-between', 
-    alignItems: 'center', 
-    padding: '20px 20px 10px 20px', // Top, Right, Bottom, Left
-    flexShrink: 0 
-  }}>
-    <h3 style={{ margin: 0 }}>Resource Manager</h3>
-    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-      <button style={{ border: `1px solid ${THEME.border}`, background: 'none', padding: '8px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>
-        + Import .xlsx
-      </button>
-      <button 
-        onClick={() => {
-          if(window.confirm("Reset all labour rows to baseline (1 worker/day)?")) {
-            setResourceRows(resourceRows.map(row => ({ ...row, count: 1, number: 1 })));
-          }
-        }}
-        style={{ border: `1px solid ${THEME.primary}`, color: THEME.primary, background: 'none', padding: '8px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}
-      >
-        Refresh to Base Budget
-      </button>
-    </div>
-  </div>
+  // Checking budget overruns (Turns text red if valuation goes past grandTotal budget base)
+  const isOverBudget = currentTotalValuation > grandTotal;
 
-  {/* 2. Headings Row */}
-  <div style={{ 
-    ...RESOURCE_GRID_LAYOUT, 
-    padding: '10px 20px', 
-    width: '100%',
-    boxSizing: 'border-box',
-    borderBottom: '1px solid #f1f5f9', 
-    flexShrink: 0 
-  }}>
-    {['Task', 'Role', 'Days', 'Number', 'Rate', 'Total', ''].map((h, i) => (
-      <span key={i} style={{ fontSize: '10px', fontWeight: '800', color: THEME.muted, textTransform: 'uppercase', textAlign: 'center' }}>{h}</span>
-    ))}
-  </div>
+  const craneRisk = parseInt(weather.wind) > 15 ? 'CAUTION' : 'LOW';
+  const curingRisk = parseInt(weather.temp) > 30 ? 'CRITICAL' : 'OPTIMAL';
+  const evapRate = parseInt(weather.humidity) < 30 ? 'High' : 'Normal';
 
-  {/* 3. THE VARIATION INPUT BAR (The Blue Strip) */}
-  <div style={{ 
-    ...RESOURCE_GRID_LAYOUT, 
-    width: '100%', // Ensure it fills the width
-    boxSizing: 'border-box',
-    padding: '12px 20px', 
-    backgroundColor: '#f5efff', 
-    borderBottom: '2px solid #d3bffe',
-    alignItems: 'center'
-  }}>
-    <select 
-      value={variationInput.task} 
-      onChange={(e) => setVariationInput({...variationInput, task: e.target.value})} 
-      style={{ ...inputStyle, background: 'white', border: `1px solid ${THEME.primary}` }}
-    >
-      <option value="">Select Task...</option>
-      {allTasks.map(task => <option key={task} value={task}>{task}</option>)}
-    </select>
-    
-    <select 
-      value={variationInput.type} 
-      onChange={(e) => setVariationInput({...variationInput, type: e.target.value})} 
-      style={{ ...inputStyle, background: 'white' }}
-    >
-      {allRoles.map(role => <option key={role} value={role}>{role}</option>)}
-    </select>
-    
-    <input type="number" value={variationInput.count} onChange={(e) => setVariationInput({...variationInput, count: e.target.value})} style={inputStyle} />
-    <input type="number" value={variationInput.number} onChange={(e) => setVariationInput({...variationInput, number: e.target.value})} style={inputStyle} />
-    
-    <div style={{ textAlign: 'center', fontSize: '10px', fontWeight: '700', color: THEME.primary }}>
-      €{getWage(variationInput.task, variationInput.type)}/h
-    </div>
-    
-    <div style={{ textAlign: 'center', fontSize: '11px', color: '#64748b' }}>—</div>
-    
-    <button 
-      onClick={handleAddVariation} 
-      style={{ backgroundColor: THEME.primary, color: 'white', border: 'none', borderRadius: '6px', padding: '8px 15px', fontWeight: '800', cursor: 'pointer' }}
-    >
-      ADD
-    </button>
-  </div>
+  const [optimizer, setOptimizer] = useState({
+    task: libraryData.filter(i => i.Category === 'Labor')[0]?.Task || '',
+    role: libraryData.filter(i => i.Category === 'Labor')[0]?.Identifier || '',
+    workerCount: 4
+  });
 
-  {/* 4. SCROLLABLE CONTENT */}
-  <div style={{ 
-    flex: 1, 
-    overflowY: 'auto', 
-    padding: '0px', // Zero padding so scrollbar hugs the edge
-    width: '100%'
-  }}>
-    {resourceRows.map((item, idx) => (
-      <div key={idx} style={{ 
-        ...RESOURCE_GRID_LAYOUT, 
-        width: '100%',
-        boxSizing: 'border-box',
-        padding: '10px 20px', // Content itself is still padded
-        borderBottom: '1px solid #f1f5f9', 
-        alignItems: 'center' 
-      }}>
-        <div style={{
-  border: 'none', 
-  background: 'none', 
-  paddingLeft: '15px', 
-  cursor: 'default',
-  color: THEME.text,
-  fontWeight: '500',
-  fontSize: '14px'
-}}>
-  {item.task}
-</div>
-        <select value={item.type} onChange={(e) => updateRow(idx, 'type', e.target.value)} style={inputStyle}>
-          {allRoles.map(role => <option key={role} value={role}>{role}</option>)}
-        </select>
-        <input type="number" value={item.count} min={0} onChange={(e) => updateRow(idx, 'count', parseInt(e.target.value) || 0)} style={inputStyle} />
-        <input type="number" value={item.number} min={1} onChange={(e) => updateRow(idx, 'number', parseInt(e.target.value) || 1)} style={inputStyle} />
-        <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: '#f5efff', border: '1px solid #d5bffe', color: '#491e8a', fontWeight: '700', fontSize: '11px', textAlign: 'center' }}>€{(item.wage || 0).toFixed(0)}/h</div>
-        <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: '#f5efff', border: '1px solid #d5bffe', color: '#491e8a', fontWeight: '700', fontSize: '11px', textAlign: 'center' }}>€{((item.number || 1) * (item.count || 0) * 8 * (item.wage || 0)).toLocaleString()}</div>
-        <button onClick={() => removeRow(idx)} style={{ background: 'none', border: 'none', color: THEME.danger, cursor: 'pointer', fontSize: '18px', fontWeight: '700' }}>×</button>
+  const optRes = useMemo(() => {
+    const selectedItem = libraryData.find(i => i.Identifier === optimizer.role);
+    const baseRate = selectedItem?.['Price (€)'] || 55;
+    const minRequired = 2; 
+    const baseDays = 12; 
+    const currentDays = Math.max(1.5, baseDays / (optimizer.workerCount / minRequired));
+    const totalCost = optimizer.workerCount * currentDays * 8 * baseRate;
+    const timeSaved = Math.max(0, baseDays - currentDays);
+    
+    let statusColor = '#ef4444'; 
+    let statusLabel = 'INSUFFICIENT';
+    if (optimizer.workerCount >= minRequired) {
+      statusColor = '#f59e0b'; 
+      statusLabel = 'OPTIMAL';
+    }
+    if (timeSaved > 4) {
+      statusColor = '#10b981'; 
+      statusLabel = 'ACCELERATED';
+    }
+
+    return { 
+      minRequired, currentDays, totalCost, timeSaved,
+      isUnderstaffed: optimizer.workerCount < minRequired,
+      statusColor,
+      statusLabel
+    };
+  }, [optimizer]);
+
+  // STYLES
+  const labelStyle = { fontSize: '10px', fontWeight: '800', color: THEME.muted, display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' };
+  const inputStyle = { width: '100%', padding: '12px', borderRadius: '10px', border: `1px solid ${THEME.border}`, fontWeight: '700', outline: 'none', background: '#fff', fontSize: '13px', transition: 'all 0.2s' };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', animation: 'fadeIn 0.6s ease-out' }}>
+      
+      {/* --- ROW 1: VALUATION & RESOURCE ACCELERATION MODULE --- */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.8fr', gap: '20px' }}>
+        
+        {/* Left Side: Live Project Valuation Card */}
+        <div style={{ ...cardStyle, background: `linear-gradient(135deg, ${THEME.sidebar} 0%, #1e1b4b 100%)`, color: 'white', padding: '30px', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div style={{ position: 'relative', zIndex: 2 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', opacity: 0.7, fontSize: '11px', fontWeight: '900', letterSpacing: '2px' }}>
+                <Timer size={14} /> LIVE PROJECT VALUATION
+              </div>
+              {/* Dropdown work state toggle */}
+              <select 
+                value={projectStatus} 
+                onChange={(e) => setProjectStatus(e.target.value)}
+                style={{ background: 'rgba(255, 255, 255, 0.1)', color: 'white', border: '1px solid rgba(255, 255, 255, 0.2)', padding: '6px 14px', borderRadius: '20px', fontSize: '11px', fontWeight: '800', outline: 'none', cursor: 'pointer' }}
+              >
+                <option value="Active" style={{ color: '#000' }}>ACTIVE</option>
+                <option value="Hold" style={{ color: '#000' }}>HOLD</option>
+                <option value="Stopped" style={{ color: '#000' }}>STOPPED</option>
+              </select>
+            </div>
+
+            <h1 style={{ fontSize: '42px', fontWeight: '950', margin: '25px 0 15px 0', letterSpacing: '-1.5px' }}>
+              €{currentTotalValuation.toLocaleString()}
+            </h1>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div style={{ fontSize: '12px', color: isOverBudget ? '#ef4444' : '#10b981', fontWeight: '700', transition: 'color 0.3s' }}>
+                ● BASE BUDGET: €{grandTotal.toLocaleString()} {isOverBudget && '(OVER BUDGET TARGET)'}
+              </div>
+              {overrunDays > 0 && <div style={{ fontSize: '12px', color: '#ef4444', fontWeight: '700' }}>● RISK EXPOSURE: +€{riskExposure.toLocaleString()}</div>}
+            </div>
+          </div>
+          <TrendingUp size={120} style={{ position: 'absolute', right: '-20px', bottom: '-20px', opacity: 0.05, color: 'white' }} />
+        </div>
+
+        {/* Right Side: Your Exact Labor Visual Metrics Card */}
+        <div style={{ ...cardStyle, background: '#fff', border: `1px solid ${THEME.border}`, padding: '30px', position: 'relative', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          
+          {/* Background Decoration */}
+          <div style={{ position: 'absolute', top: '20px', right: '20px', opacity: 0.05 }}><BarChart3 size={120} /></div>
+
+          {/* GRAPHIC ACCELERATION MODULE */}
+          <div style={{ marginBottom: '30px', textAlign: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginBottom: '15px' }}>
+              {[...Array(15)].map((_, i) => (
+                <Users 
+                  key={i} 
+                  size={20} 
+                  style={{ 
+                    color: i < optimizer.workerCount ? optRes.statusColor : '#e2e8f0',
+                    filter: i < optimizer.workerCount ? `drop-shadow(0 0 5px ${optRes.statusColor}44)` : 'none',
+                    transition: 'all 0.3s ease'
+                  }} 
+                />
+              ))}
+            </div>
+            <div style={{ position: 'relative', width: '90%', margin: '0 auto', height: '12px', background: '#f1f5f9', borderRadius: '6px' }}>
+              <div 
+                style={{ 
+                  width: `${(optimizer.workerCount / 15) * 100}%`, 
+                  height: '100%', 
+                  background: optRes.statusColor,
+                  borderRadius: '6px',
+                  transition: 'width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)'
+                }} 
+              />
+              {/* Floating Label */}
+              <div style={{
+                position: 'absolute', left: `${(optimizer.workerCount / 15) * 100}%`, transform: 'translateX(-50%)',
+                top: '-25px', background: optRes.statusColor, color: 'white', padding: '3px 10px', borderRadius: '4px',
+                fontSize: '9px', fontWeight: '900', boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                transition: 'all 0.3s ease'
+              }}>
+                {optRes.statusLabel}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
+            {/* Duration Card */}
+            <div style={{ background: '#fff', border: `1px solid ${THEME.border}`, borderRadius: '16px', padding: '20px', textAlign: 'center' }}>
+               <div style={{ background: '#f8fafc', width: '32px', height: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px auto' }}>
+                 <Clock size={18} color={THEME.muted} />
+               </div>
+               <div style={{ fontSize: '10px', fontWeight: '800', color: THEME.muted, marginBottom: '4px' }}>EST. DURATION</div>
+               <div style={{ fontSize: '24px', fontWeight: '950', color: THEME.sidebar }}>{optRes.currentDays.toFixed(1)} <span style={{fontSize: '12px'}}>Days</span></div>
+            </div>
+
+            {/* Efficiency Card */}
+            <div style={{ background: `${optRes.statusColor}10`, border: `1px solid ${optRes.statusColor}33`, borderRadius: '16px', padding: '20px', textAlign: 'center' }}>
+               <div style={{ background: `${optRes.statusColor}22`, width: '32px', height: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px auto' }}>
+                 <TrendingDown size={18} color={optRes.statusColor} />
+               </div>
+               <div style={{ fontSize: '10px', fontWeight: '800', color: optRes.statusColor, marginBottom: '4px' }}>TIME SAVED</div>
+               <div style={{ fontSize: '24px', fontWeight: '950', color: optRes.statusColor }}>{optRes.timeSaved.toFixed(1)} <span style={{fontSize: '12px'}}>Days</span></div>
+            </div>
+
+            {/* Cost Card */}
+            <div style={{ background: THEME.sidebar, borderRadius: '16px', padding: '20px', textAlign: 'center', color: 'white' }}>
+               <div style={{ background: 'rgba(255,255,255,0.1)', width: '32px', height: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px auto' }}>
+                 <HardHat size={18} color={THEME.success} />
+               </div>
+               <div style={{ fontSize: '10px', fontWeight: '800', opacity: 0.6, marginBottom: '4px' }}>SIMULATED COST</div>
+               <div style={{ fontSize: '24px', fontWeight: '950', color: 'white' }}>€{optRes.totalCost.toLocaleString()}</div>
+            </div>
+          </div>
+
+        </div>
+
       </div>
-    ))}
-  </div>
-</div>
-</div>
 
-   {/* RIGHT COLUMN */}
-   <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-    <div style={{ ...cardStyle, background: THEME.primary, color: 'white', border: 'none', padding: '24px' }}>
-     <p style={{ margin: 0, fontSize: '10px', fontWeight: '800', opacity: 0.7 }}>ESTIMATED PROJECT COST</p>
-     <div style={{ fontSize: '20px', fontWeight: '900', marginBottom: '16px' }}>€{grandTotal.toLocaleString()}</div>
-     <p style={{ margin: 0, fontSize: '10px', fontWeight: '800', opacity: 0.7 }}>{phaseLabel} COST</p>
-     <div style={{ fontSize: '20px', fontWeight: '900' }}>€{selectedPhaseCost.toLocaleString()}</div>
-     <button onClick={() => setActiveTab('Project Hub')} style={{ width: '100%', marginTop: '20px', padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', fontWeight: '800', cursor: 'pointer', fontSize: '11px' }}>VIEW BREAKDOWN →</button>
-    </div>
+      {/* --- ROW 2: SITE ENVIRONMENTAL REPORT --- */}
+      <div style={{ ...cardStyle, background: '#f8fafc', padding: '25px', border: `1px solid ${THEME.border}` }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '10px', fontSize: '16px', fontWeight: '800' }}>
+              <CloudSun color={THEME.primary} /> Site Environmental Report
+            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#fff', border: `1px solid ${THEME.border}`, padding: '4px 10px', borderRadius: '8px' }}>
+              <MapPin size={14} color={THEME.muted} />
+              <select value={city} onChange={(e) => setCity(e.target.value)} style={{ border: 'none', background: 'transparent', fontSize: '12px', fontWeight: '700', outline: 'none', cursor: 'pointer' }}>
+                {['Milan', 'Bergamo', 'Brescia', 'Como', 'Monza', 'Varese'].map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+          </div>
+          <a href={`https://openweathermap.org/find?q=${city},IT`} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: THEME.primary, textDecoration: 'none', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            Full Forecast <ExternalLink size={12}/>
+          </a>
+        </div>
 
-{/* SAVE STATUS WIDGET */}
-<div style={{ 
-  ...cardStyle, 
-  padding: '15px 20px', 
-  display: 'flex', 
-  flexDirection: 'column', 
-  gap: '10px',
-  borderLeft: `4px solid ${THEME.primary}` // Match the orange button color
-}}>
-  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-    <div style={{ fontSize: '10px', fontWeight: '800', color: THEME.muted, textTransform: 'uppercase' }}>
-      Sync Status
-    </div>
-    <div style={{ fontSize: '10px', fontWeight: '700', color: THEME.primary, display: 'flex', alignItems: 'center', gap: '4px' }}>
-      <Check size={12} /> SAVED
-    </div>
-  </div>
-  
-  <div style={{ fontSize: '11px', color: THEME.sidebar, fontWeight: '600' }}>
-    Last Sync: <span style={{ color: THEME.muted }}>{lastSaved}</span>
-  </div>
-
-  <button 
-    onClick={onSave}
-    style={{ 
-      width: '100%',
-      backgroundColor: THEME.primary, 
-      color: 'white', 
-      border: 'none', 
-      padding: '10px', 
-      borderRadius: '8px', 
-      fontSize: '11px', 
-      fontWeight: '800', 
-      cursor: 'pointer',
-      marginTop: '5px'
-    }}
-  >
-    SAVE CHANGES NOW
-  </button>
-</div>
-
-    <div style={{ ...cardStyle, borderTop: `4px solid ${THEME.black}`, padding: '20px' }}>
-     <h3 style={{ margin: '0 0 15px 0', fontSize: '14px' }}>Parameters</h3>
-     {[
-      { label: 'GIA', key: 'gia', icon: <Maximize size={14}/> },
-      { label: 'Storeys', key: 'storeys', icon: <Layers size={14}/> },
-      { label: 'Wall Area', key: 'wallArea', icon: <Warehouse size={14}/> },
-      { label: 'Window Area', key: 'windowArea', icon: <Box size={14}/> }
-     ].map(field => (
-      <div key={field.key} style={{ marginBottom: '12px' }}>
-       <label style={{ fontSize: '10px', fontWeight: '800', color: THEME.muted, display: 'flex', alignItems: 'center', gap: '5px' }}>{field.icon} {field.label.toUpperCase()}</label>
-       <input type="number" value={projectData[field.key]} onChange={(e) => setProjectData({...projectData, [field.key]: parseFloat(e.target.value) || 0})} style={{ ...selectStyle, padding: '8px', marginTop: '4px' }} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '15px' }}>
+          <div style={{ background: 'white', padding: '15px', borderRadius: '15px', border: '1px solid #e2e8f0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: THEME.muted, fontSize: '11px', fontWeight: '800' }}><Thermometer size={14}/> AIR TEMP</div>
+            <div style={{ fontSize: '22px', fontWeight: '900', marginTop: '5px' }}>{weather.temp}°C</div>
+            <div style={{ fontSize: '10px', color: curingRisk === 'OPTIMAL' ? '#10b981' : '#ef4444', fontWeight: '700', marginTop: '4px' }}>CONCRETE: {curingRisk}</div>
+          </div>
+          <div style={{ background: 'white', padding: '15px', borderRadius: '15px', border: '1px solid #e2e8f0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: THEME.muted, fontSize: '11px', fontWeight: '800' }}><Wind size={14}/> WIND SPEED</div>
+            <div style={{ fontSize: '22px', fontWeight: '900', marginTop: '5px' }}>{weather.wind}</div>
+            <div style={{ fontSize: '10px', color: craneRisk === 'LOW' ? '#10b981' : '#ef4444', fontWeight: '700', marginTop: '4px' }}>CRANE RISK: {craneRisk}</div>
+          </div>
+          <div style={{ background: 'white', padding: '15px', borderRadius: '15px', border: '1px solid #e2e8f0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: THEME.muted, fontSize: '11px', fontWeight: '800' }}><Droplets size={14}/> HUMIDITY</div>
+            <div style={{ fontSize: '22px', fontWeight: '900', marginTop: '5px' }}>{weather.humidity}</div>
+            <div style={{ fontSize: '10px', color: THEME.muted, marginTop: '4px' }}>Evaporation Rate: {evapRate}</div>
+          </div>
+          <div style={{ background: THEME.sidebar, color: 'white', padding: '15px', borderRadius: '15px' }}>
+            <div style={{ fontSize: '10px', fontWeight: '800', opacity: 0.6 }}>LOMBARDIA FORECAST</div>
+            <div style={{ fontSize: '18px', fontWeight: '800', marginTop: '5px' }}>{weather.forecast}</div>
+            <div style={{ fontSize: '10px', color: '#fbbf24', fontWeight: '700', marginTop: '4px' }}>PRO-TIP: Seal Partition Openings</div>
+          </div>
+        </div>
       </div>
-     ))}
-    </div>
 
-    <div style={{ ...cardStyle, padding: '20px' }}>
-     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-      <CloudSun size={20} color="#1e40af" />
-      <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700' }}>Weather</h3>
-      <div style={{ marginLeft: 'auto', backgroundColor: '#ffedd5', color: '#9a3412', padding: '4px 10px', borderRadius: '15px', fontSize: '13px', fontWeight: '700' }}>{weather.temp}°C</div>
-     </div>
-     <div style={{ fontSize: '15px', color: '#475569' }}>{weather.condition}</div>
+      {/* --- ROW 3: ALLOCATION, PARAMETERS & INPUT CONFIGURATOR --- */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 0.8fr 1.2fr', gap: '20px', alignItems: 'start' }}>
+        
+        {/* Capital Allocation Block */}
+        <div style={{ ...cardStyle, padding: '20px' }}>
+          <h3 style={{ margin: '0 0 15px 0', fontSize: '15px', fontWeight: '800' }}>Capital Allocation</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {phases.map(phase => (
+              <div key={phase.id} style={{ padding: '8px 12px', borderRadius: '10px', background: '#f8fafc', border: '1px solid #f1f5f9' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: '800', marginBottom: '6px' }}>
+                  <span style={{ color: THEME.sidebar }}>{phase.name}</span>
+                  <span>€{phase.totalCost.toLocaleString()}</span>
+                </div>
+                <div style={{ height: '6px', background: '#e2e8f0', borderRadius: '10px', overflow: 'hidden' }}>
+                  <div style={{ width: `${(phase.totalCost / grandTotal) * 100}%`, height: '100%', background: THEME.primary }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Project Parameters Card */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          <div style={{ ...cardStyle, padding: '20px' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: '800', margin: '0 0 15px 0' }}>Project Parameters</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              
+              {/* Building Typology Dropdown */}
+              <div style={{ background: '#f1f5f9', padding: '10px', borderRadius: '10px' }}>
+                <label style={{ fontSize: '9px', fontWeight: '900', color: THEME.muted, display: 'block', marginBottom: '4px' }}>
+                  BUILDING TYPOLOGY
+                </label>
+                <select
+                  value={projectData.typology || 'Single Family Home'}
+                  onChange={(e) => setProjectData({ ...projectData, typology: e.target.value })}
+                  style={{ 
+                    width: '100%', 
+                    border: 'none', 
+                    background: 'transparent', 
+                    fontWeight: '800', 
+                    outline: 'none', 
+                    fontSize: '14px',
+                    color: '#1e293b',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="Single Family Home">Single Family Home</option>
+                  <option value="Apartment Building">Apartment Building</option>
+                  <option value="Office">Office</option>
+                  <option value="School">School</option>
+                </select>
+              </div>
+
+              {/* Numerical Inputs Loop */}
+              {[
+                { label: 'GIA (m²)', key: 'gia' }, 
+                { label: 'STOREYS', key: 'storeys' }, 
+                { label: 'WALL AREA (m²)', key: 'wallArea' }, 
+                { label: 'WINDOW AREA (m²)', key: 'windowArea' }
+              ].map(spec => (
+                <div key={spec.key} style={{ background: '#f1f5f9', padding: '10px', borderRadius: '10px' }}>
+                  <label style={{ fontSize: '9px', fontWeight: '900', color: THEME.muted, display: 'block', marginBottom: '2px' }}>{spec.label}</label>
+                  <input 
+                    type="number" 
+                    value={projectData[spec.key]} 
+                    onChange={(e) => setProjectData({...projectData, [spec.key]: parseFloat(e.target.value) || 0})} 
+                    style={{ width: '100%', border: 'none', background: 'transparent', fontWeight: '800', outline: 'none', fontSize: '14px' }} 
+                  />
+                </div>
+              ))}
+              
+            </div>
+          </div>
+          <button onClick={onSave} style={{ background: THEME.primary, color: 'white', padding: '14px', borderRadius: '10px', border: 'none', fontSize: '11px', fontWeight: '900', cursor: 'pointer', boxShadow: `0 4px 12px ${THEME.primary}33` }}>
+            SYNC DATA
+          </button>
+        </div>
+
+        {/* Resource Optimizer Controls Side-Panel */}
+        <div style={{ ...cardStyle, background: '#fff', border: `1px solid ${THEME.border}`, padding: '20px' }}>
+          <div style={{ marginBottom: '15px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+              <Target size={18} color={THEME.primary} />
+              <h3 style={{ margin: 0, fontSize: '14px', fontWeight: '900' }}>RESOURCE OPTIMIZER</h3>
+            </div>
+            <p style={{ margin: 0, fontSize: '11px', color: THEME.muted }}>Simulate task workflows & crew deployments.</p>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            <div>
+              <label style={labelStyle}>Task Selection</label>
+              <select style={inputStyle} value={optimizer.task} onChange={(e) => setOptimizer({...optimizer, task: e.target.value})}>
+                {[...new Set(libraryData.filter(i => i.Category === 'Labor').map(i => i.Task))].map(t => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label style={labelStyle}>Primary Trade Role</label>
+              <select style={inputStyle} value={optimizer.role} onChange={(e) => setOptimizer({...optimizer, role: e.target.value})}>
+                {libraryData.filter(i => i.Category === 'Labor' && i.Task === optimizer.task).map(i => (
+                  <option key={i.Identifier} value={i.Identifier}>{i.Identifier}</option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '12px', border: `1px solid ${THEME.border}` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <label style={{ ...labelStyle, marginBottom: 0 }}>Deployment Size</label>
+                <span style={{ fontSize: '13px', fontWeight: '900', color: optRes.statusColor }}>{optimizer.workerCount} Workers</span>
+              </div>
+              <input 
+                type="range" min="1" max="15" step="1" 
+                value={optimizer.workerCount} 
+                onChange={(e) => setOptimizer({...optimizer, workerCount: parseInt(e.target.value)})}
+                style={{ width: '100%', accentColor: optRes.statusColor, cursor: 'pointer' }}
+              />
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '9px', fontWeight: '700', color: THEME.muted }}>
+                <span>1 Person</span>
+                <span>15 Max</span>
+              </div>
+            </div>
+
+            <div style={{ marginTop: '30px', padding: '20px', borderRadius: '12px', background: optRes.isUnderstaffed ? '#FFF7ED' : '#F8FAFC', border: `1px dashed ${optRes.isUnderstaffed ? '#ef4444' : THEME.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: `${optRes.statusColor}22`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {optRes.isUnderstaffed ? <AlertTriangle color="#ef4444" size={20}/> : <ShieldCheck color={optRes.statusColor} size={20}/>}
+              </div>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontSize: '13px', fontWeight: '800', color: optRes.isUnderstaffed ? '#ef4444' : THEME.sidebar }}>
+                  {optRes.isUnderstaffed ? "Staffing Alert: Below minimum safety threshold" : `Deployment: ${optRes.statusLabel}`}
+                </div>
+                <div style={{ fontSize: '11px', color: THEME.muted }}>Required Crew: {optRes.minRequired} Persons</div>
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+
+      </div>
     </div>
-   </div>
-  </div>
- );
+  );
 };
 
 export default Dashboard;

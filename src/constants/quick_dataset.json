@@ -1,0 +1,813 @@
+{
+  "Single Family Home": {
+    "costPerM2": 2560.0,
+    "costPerM3": 768.0,
+    "baseDays": 360.0,
+    "baseGia": 270.0,
+    "baseVolume": 900.0,
+    "baseStoreys": 2,
+    "baseUnits": 1,
+    "baseHeight": 7.0,
+    "laborFactor": 2.2,
+    "phases": [
+      {
+        "name": "Foundations and Basement Walls",
+        "baseDuration": 35.0,
+        "tasks": [
+          {
+            "code": "1.1",
+            "name": "Construction site  and excavations plant",
+            "baseCost": 10845.0,
+            "percentage": 0.016,
+            "baseDuration": 10.0
+          },
+          {
+            "code": "1.2",
+            "name": "Reinforced concrete  structure",
+            "baseCost": 138095.0,
+            "percentage": 0.2,
+            "baseDuration": 10.0
+          },
+          {
+            "code": "1.3",
+            "name": "Tinsmith work",
+            "baseCost": 15906.0,
+            "percentage": 0.023,
+            "baseDuration": 5.0
+          },
+          {
+            "code": "1.4",
+            "name": "Foundation  and leveling layer",
+            "baseCost": 33259.0,
+            "percentage": 0.048,
+            "baseDuration": 10.0
+          }
+        ]
+      },
+      {
+        "name": "Works in Elevation and Roofing",
+        "baseDuration": 65.0,
+        "tasks": [
+          {
+            "code": "2.1",
+            "name": "Masonry and partitions",
+            "baseCost": 47719.0,
+            "percentage": 0.069,
+            "baseDuration": 65.0
+          }
+        ]
+      },
+      {
+        "name": "Fillings,  Ventilated Crawl Space",
+        "baseDuration": 45.0,
+        "tasks": [
+          {
+            "code": "3.1",
+            "name": "Frames",
+            "baseCost": 50611.0,
+            "percentage": 0.073,
+            "baseDuration": 45.0
+          }
+        ]
+      },
+      {
+        "name": "Partition walls and panels",
+        "baseDuration": 75.0,
+        "tasks": [
+          {
+            "code": "4.1",
+            "name": "Interior and  exterior plasters",
+            "baseCost": 36874.0,
+            "percentage": 0.053,
+            "baseDuration": 75.0
+          }
+        ]
+      },
+      {
+        "name": "Tiles and Channels",
+        "baseDuration": 30.0,
+        "tasks": [
+          {
+            "code": "5.1",
+            "name": "Roofing",
+            "baseCost": 19521.0,
+            "percentage": 0.028,
+            "baseDuration": 30.0
+          }
+        ]
+      },
+      {
+        "name": "Pipes, Drains, Chimneys",
+        "baseDuration": 15.0,
+        "tasks": [
+          {
+            "code": "6.1",
+            "name": "Assistances",
+            "baseCost": 84592.0,
+            "percentage": 0.122,
+            "baseDuration": 15.0
+          }
+        ]
+      },
+      {
+        "name": "Waterproofing",
+        "baseDuration": 30.0,
+        "tasks": [
+          {
+            "code": "7.1",
+            "name": "Waterproofing  and insulation",
+            "baseCost": 8676.0,
+            "percentage": 0.013,
+            "baseDuration": 30.0
+          }
+        ]
+      },
+      {
+        "name": "Plumbing and Thermal Systems",
+        "baseDuration": 50.0,
+        "tasks": [
+          {
+            "code": "8.1",
+            "name": "Hydro-thermal  sanitary system",
+            "baseCost": 64348.0,
+            "percentage": 0.093,
+            "baseDuration": 50.0
+          }
+        ]
+      },
+      {
+        "name": "Electrical System",
+        "baseDuration": 45.0,
+        "tasks": [
+          {
+            "code": "9.1",
+            "name": "Electrical system",
+            "baseCost": 16629.0,
+            "percentage": 0.024,
+            "baseDuration": 45.0
+          }
+        ]
+      },
+      {
+        "name": "Floors and coverings",
+        "baseDuration": 45.0,
+        "tasks": [
+          {
+            "code": "10.1",
+            "name": "Floors and coverings",
+            "baseCost": 79531.0,
+            "percentage": 0.115,
+            "baseDuration": 45.0
+          }
+        ]
+      },
+      {
+        "name": "Windows and Doors",
+        "baseDuration": 45.0,
+        "tasks": [
+          {
+            "code": "11.1",
+            "name": "Works in marble",
+            "baseCost": 35428.0,
+            "percentage": 0.051,
+            "baseDuration": 25.0
+          },
+          {
+            "code": "11.2",
+            "name": "Works in iron",
+            "baseCost": 15906.0,
+            "percentage": 0.023,
+            "baseDuration": 20.0
+          }
+        ]
+      },
+      {
+        "name": "External works",
+        "baseDuration": 30.0,
+        "tasks": [
+          {
+            "code": "12.1",
+            "name": "Paintwork",
+            "baseCost": 17352.0,
+            "percentage": 0.025,
+            "baseDuration": 15.0
+          },
+          {
+            "code": "12.2",
+            "name": "Works for garden",
+            "baseCost": 15906.0,
+            "percentage": 0.023,
+            "baseDuration": 15.0
+          }
+        ]
+      }
+    ]
+  },
+  "Multi-Storey Apartment": {
+    "costPerM2": 2150.0,
+    "costPerM3": 679.0,
+    "baseDays": 320.0,
+    "baseGia": 900.0,
+    "baseVolume": 2850.0,
+    "baseStoreys": 4,
+    "baseUnits": 8,
+    "baseHeight": 14.0,
+    "laborFactor": 1.9,
+    "phases": [
+      {
+        "name": "Excavations and Backfills",
+        "baseDuration": 20.0,
+        "tasks": [
+          {
+            "code": "1.1",
+            "name": "Excavations, backfilling  and waste transport",
+            "baseCost": 29025.0,
+            "percentage": 0.015,
+            "baseDuration": 10.0
+          },
+          {
+            "code": "1.2",
+            "name": "Foundations",
+            "baseCost": 102555.0,
+            "percentage": 0.053,
+            "baseDuration": 10.0
+          }
+        ]
+      },
+      {
+        "name": "Reinforced Concrete",
+        "baseDuration": 50.0,
+        "tasks": [
+          {
+            "code": "2.1",
+            "name": "Works in  reinforced concrete",
+            "baseCost": 342495.0,
+            "percentage": 0.177,
+            "baseDuration": 50.0
+          }
+        ]
+      },
+      {
+        "name": "Provisional Works",
+        "baseDuration": 25.0,
+        "tasks": [
+          {
+            "code": "3.1",
+            "name": "Works in iron",
+            "baseCost": 36765.0,
+            "percentage": 0.019,
+            "baseDuration": 10.0
+          },
+          {
+            "code": "3.2",
+            "name": "Back ground works",
+            "baseCost": 36765.0,
+            "percentage": 0.019,
+            "baseDuration": 10.0
+          },
+          {
+            "code": "3.3",
+            "name": "Provisional works",
+            "baseCost": 32895.0,
+            "percentage": 0.017,
+            "baseDuration": 5.0
+          }
+        ]
+      },
+      {
+        "name": "Perimeter closures",
+        "baseDuration": 50.0,
+        "tasks": [
+          {
+            "code": "4.1",
+            "name": "External partitions",
+            "baseCost": 38700.0,
+            "percentage": 0.02,
+            "baseDuration": 25.0
+          },
+          {
+            "code": "4.2",
+            "name": "Ventilated façade",
+            "baseCost": 236070.0,
+            "percentage": 0.122,
+            "baseDuration": 25.0
+          }
+        ]
+      },
+      {
+        "name": "Internal partitions",
+        "baseDuration": 30.0,
+        "tasks": [
+          {
+            "code": "5.1",
+            "name": "Internal partitions",
+            "baseCost": 29025.0,
+            "percentage": 0.015,
+            "baseDuration": 30.0
+          }
+        ]
+      },
+      {
+        "name": "Crawl spaces and subfloors",
+        "baseDuration": 15.0,
+        "tasks": [
+          {
+            "code": "6.1",
+            "name": "Insulations",
+            "baseCost": 21285.0,
+            "percentage": 0.011,
+            "baseDuration": 15.0
+          }
+        ]
+      },
+      {
+        "name": "Covers",
+        "baseDuration": 30.0,
+        "tasks": [
+          {
+            "code": "7.1",
+            "name": "Coverage",
+            "baseCost": 25155.0,
+            "percentage": 0.013,
+            "baseDuration": 30.0
+          }
+        ]
+      },
+      {
+        "name": "Floorings",
+        "baseDuration": 25.0,
+        "tasks": [
+          {
+            "code": "8.1",
+            "name": "Floors",
+            "baseCost": 87075.0,
+            "percentage": 0.045,
+            "baseDuration": 25.0
+          }
+        ]
+      },
+      {
+        "name": "Finishes  and Coatings",
+        "baseDuration": 35.0,
+        "tasks": [
+          {
+            "code": "9.1",
+            "name": "Coatings",
+            "baseCost": 123840.0,
+            "percentage": 0.064,
+            "baseDuration": 10.0
+          },
+          {
+            "code": "9.2",
+            "name": "Plasters",
+            "baseCost": 89010.0,
+            "percentage": 0.046,
+            "baseDuration": 10.0
+          },
+          {
+            "code": "9.3",
+            "name": "Painting",
+            "baseCost": 52245.0,
+            "percentage": 0.027,
+            "baseDuration": 15.0
+          }
+        ]
+      },
+      {
+        "name": "Fixtures and Frames",
+        "baseDuration": 10.0,
+        "tasks": [
+          {
+            "code": "10.1",
+            "name": "Exterior doors  and windows",
+            "baseCost": 139320.0,
+            "percentage": 0.072,
+            "baseDuration": 5.0
+          },
+          {
+            "code": "10.2",
+            "name": "Interior doors  and windows",
+            "baseCost": 44505.0,
+            "percentage": 0.023,
+            "baseDuration": 5.0
+          }
+        ]
+      },
+      {
+        "name": "Ceilings",
+        "baseDuration": 15.0,
+        "tasks": [
+          {
+            "code": "11.1",
+            "name": "Sheilding systems",
+            "baseCost": 77400.0,
+            "percentage": 0.04,
+            "baseDuration": 15.0
+          }
+        ]
+      },
+      {
+        "name": "Electrical and thermal systems",
+        "baseDuration": 8.0,
+        "tasks": [
+          {
+            "code": "12.1",
+            "name": "Electrical system",
+            "baseCost": 34830.0,
+            "percentage": 0.018,
+            "baseDuration": 2.0
+          },
+          {
+            "code": "12.2",
+            "name": "Solar heating system",
+            "baseCost": 247680.0,
+            "percentage": 0.128,
+            "baseDuration": 3.0
+          },
+          {
+            "code": "12.3",
+            "name": "Plumbing system",
+            "baseCost": 89010.0,
+            "percentage": 0.046,
+            "baseDuration": 3.0
+          }
+        ]
+      },
+      {
+        "name": "Security systems and Elevators",
+        "baseDuration": 5.0,
+        "tasks": [
+          {
+            "code": "13.1",
+            "name": "Elevator system",
+            "baseCost": 19350.0,
+            "percentage": 0.01,
+            "baseDuration": 5.0
+          }
+        ]
+      }
+    ]
+  },
+  "Office Building": {
+    "costPerM2": 1760.0,
+    "costPerM3": 637.0,
+    "baseDays": 180.0,
+    "baseGia": 1050.0,
+    "baseVolume": 2900.0,
+    "baseStoreys": 3,
+    "baseUnits": 1,
+    "baseHeight": 10.5,
+    "laborFactor": 1.6,
+    "phases": [
+      {
+        "name": "Provisional Works",
+        "baseDuration": 15.0,
+        "tasks": [
+          {
+            "code": "1.1",
+            "name": "Provisional works,  protections,  and demarcations",
+            "baseCost": 80574.0,
+            "percentage": 0.044,
+            "baseDuration": 15.0
+          }
+        ]
+      },
+      {
+        "name": "Excavations and Backfills",
+        "baseDuration": 10.0,
+        "tasks": [
+          {
+            "code": "2.1",
+            "name": "Excavations  and backfills",
+            "baseCost": 63030.0,
+            "percentage": 0.034,
+            "baseDuration": 10.0
+          }
+        ]
+      },
+      {
+        "name": "Subfloors",
+        "baseDuration": 10.0,
+        "tasks": [
+          {
+            "code": "3.1",
+            "name": "Wasps nests  and subfloors",
+            "baseCost": 31840.0,
+            "percentage": 0.017,
+            "baseDuration": 10.0
+          }
+        ]
+      },
+      {
+        "name": "Reinforced Concrete",
+        "baseDuration": 30.0,
+        "tasks": [
+          {
+            "code": "4.1",
+            "name": "Works in  reinforced concrete",
+            "baseCost": 566616.0,
+            "percentage": 0.307,
+            "baseDuration": 30.0
+          }
+        ]
+      },
+      {
+        "name": "Perimeter closures",
+        "baseDuration": 25.0,
+        "tasks": [
+          {
+            "code": "5.1",
+            "name": "Perimeter closures",
+            "baseCost": 205983.0,
+            "percentage": 0.111,
+            "baseDuration": 25.0
+          }
+        ]
+      },
+      {
+        "name": "Internal partitions",
+        "baseDuration": 15.0,
+        "tasks": [
+          {
+            "code": "6.1",
+            "name": "Internal partitions",
+            "baseCost": 25342.0,
+            "percentage": 0.014,
+            "baseDuration": 15.0
+          }
+        ]
+      },
+      {
+        "name": "Finishes and Coatings",
+        "baseDuration": 20.0,
+        "tasks": [
+          {
+            "code": "7.1",
+            "name": "High-quality  finishes and coatings",
+            "baseCost": 179992.0,
+            "percentage": 0.097,
+            "baseDuration": 20.0
+          }
+        ]
+      },
+      {
+        "name": "Fixtures and Frames",
+        "baseDuration": 7.0,
+        "tasks": [
+          {
+            "code": "8.1",
+            "name": "Fixtures and fittings",
+            "baseCost": 112414.0,
+            "percentage": 0.061,
+            "baseDuration": 7.0
+          }
+        ]
+      },
+      {
+        "name": "Ceilings",
+        "baseDuration": 10.0,
+        "tasks": [
+          {
+            "code": "9.1",
+            "name": "Ceiling and false  ceiling coverings",
+            "baseCost": 77325.0,
+            "percentage": 0.042,
+            "baseDuration": 10.0
+          }
+        ]
+      },
+      {
+        "name": "Floorings",
+        "baseDuration": 15.0,
+        "tasks": [
+          {
+            "code": "10.1",
+            "name": "Floorings",
+            "baseCost": 118262.0,
+            "percentage": 0.064,
+            "baseDuration": 15.0
+          }
+        ]
+      },
+      {
+        "name": "Covers",
+        "baseDuration": 15.0,
+        "tasks": [
+          {
+            "code": "11.1",
+            "name": "Covers",
+            "baseCost": 140354.0,
+            "percentage": 0.076,
+            "baseDuration": 15.0
+          }
+        ]
+      },
+      {
+        "name": "Electrical and Thermal systems",
+        "baseDuration": 5.0,
+        "tasks": [
+          {
+            "code": "12.1",
+            "name": "Electrical and  thermal systems",
+            "baseCost": 178692.0,
+            "percentage": 0.097,
+            "baseDuration": 5.0
+          }
+        ]
+      },
+      {
+        "name": "Security systems and Elevators",
+        "baseDuration": 3.0,
+        "tasks": [
+          {
+            "code": "13.1",
+            "name": "Security systems,  elevators, and special ones",
+            "baseCost": 67578.0,
+            "percentage": 0.037,
+            "baseDuration": 3.0
+          }
+        ]
+      }
+    ]
+  },
+  "Educational Building": {
+    "costPerM2": 1714.0,
+    "costPerM3": 523.0,
+    "baseDays": 365.0,
+    "baseGia": 2500.0,
+    "baseVolume": 8200.0,
+    "baseStoreys": 2,
+    "baseUnits": 20,
+    "baseHeight": 7.0,
+    "laborFactor": 1.8,
+    "phases": [
+      {
+        "name": "Excavations",
+        "baseDuration": 30.0,
+        "tasks": [
+          {
+            "code": "1.1",
+            "name": "Excavations, backfills,  and waste transport",
+            "baseCost": 51420.0,
+            "percentage": 0.012,
+            "baseDuration": 30.0
+          }
+        ]
+      },
+      {
+        "name": "Structures",
+        "baseDuration": 132.0,
+        "tasks": [
+          {
+            "code": "2.1",
+            "name": "Structures",
+            "baseCost": 546938.0,
+            "percentage": 0.128,
+            "baseDuration": 45.0
+          },
+          {
+            "code": "2.2",
+            "name": "Structural works  in iron",
+            "baseCost": 66827.0,
+            "percentage": 0.016,
+            "baseDuration": 40.0
+          },
+          {
+            "code": "2.3",
+            "name": "Prefabricated structures",
+            "baseCost": 143778.0,
+            "percentage": 0.034,
+            "baseDuration": 47.0
+          }
+        ]
+      },
+      {
+        "name": "Masonry",
+        "baseDuration": 130.0,
+        "tasks": [
+          {
+            "code": "3.1",
+            "name": "Works in iron",
+            "baseCost": 24301.0,
+            "percentage": 0.006,
+            "baseDuration": 50.0
+          },
+          {
+            "code": "3.2",
+            "name": "Internal and  external partitions",
+            "baseCost": 145803.0,
+            "percentage": 0.034,
+            "baseDuration": 50.0
+          },
+          {
+            "code": "3.4",
+            "name": "Coverage",
+            "baseCost": 294307.0,
+            "percentage": 0.069,
+            "baseDuration": 30.0
+          }
+        ]
+      },
+      {
+        "name": "Floors",
+        "baseDuration": 125.0,
+        "tasks": [
+          {
+            "code": "4.1",
+            "name": "Floors and coverings",
+            "baseCost": 731717.0,
+            "percentage": 0.171,
+            "baseDuration": 125.0
+          }
+        ]
+      },
+      {
+        "name": "Coatings",
+        "baseDuration": 110.0,
+        "tasks": [
+          {
+            "code": "5.1",
+            "name": "Plasters",
+            "baseCost": 186304.0,
+            "percentage": 0.043,
+            "baseDuration": 50.0
+          },
+          {
+            "code": "5.2",
+            "name": "Painting",
+            "baseCost": 124878.0,
+            "percentage": 0.029,
+            "baseDuration": 60.0
+          }
+        ]
+      },
+      {
+        "name": "Windows & Doors",
+        "baseDuration": 120.0,
+        "tasks": [
+          {
+            "code": "6.1",
+            "name": "Exterior doors  and windows",
+            "baseCost": 417835.0,
+            "percentage": 0.098,
+            "baseDuration": 60.0
+          },
+          {
+            "code": "6.2",
+            "name": "Interior doors  and windows",
+            "baseCost": 47926.0,
+            "percentage": 0.011,
+            "baseDuration": 60.0
+          }
+        ]
+      },
+      {
+        "name": "Plants",
+        "baseDuration": 150.0,
+        "tasks": [
+          {
+            "code": "7.1",
+            "name": "Sanitation facilities",
+            "baseCost": 59401.0,
+            "percentage": 0.014,
+            "baseDuration": 50.0
+          },
+          {
+            "code": "7.2",
+            "name": "Lifting systems",
+            "baseCost": 44551.0,
+            "percentage": 0.01,
+            "baseDuration": 25.0
+          },
+          {
+            "code": "7.3",
+            "name": "Air conditioning systems",
+            "baseCost": 820819.0,
+            "percentage": 0.192,
+            "baseDuration": 50.0
+          },
+          {
+            "code": "7.4",
+            "name": "Plumbing system",
+            "baseCost": 18900.0,
+            "percentage": 0.004,
+            "baseDuration": 25.0
+          }
+        ]
+      },
+      {
+        "name": "Finishing systems",
+        "baseDuration": 120.0,
+        "tasks": [
+          {
+            "code": "8.1",
+            "name": "Electrical and  special systems",
+            "baseCost": 559588.0,
+            "percentage": 0.131,
+            "baseDuration": 120.0
+          }
+        ]
+      }
+    ]
+  }
+}

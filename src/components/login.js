@@ -92,54 +92,58 @@ const Login = ({ username, setUsername, password, setPassword, handleLogin, erro
           </div>
         )}
 
-        {/* INPUTS */}
-        <div style={inputContainerStyle}>
-          <User size={18} style={iconStyle} />
-          <input 
-            type="text" 
-            placeholder="Username" 
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            style={inputStyle} 
-            onFocus={(e) => e.target.style.borderColor = THEME.primary}
-            onBlur={(e) => e.target.style.borderColor = THEME.border}
-          />
-        </div>
+        {/* FORM WRAPPER (Now wraps Username, Password, AND the Button) */}
+        <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
+          
+          <div style={inputContainerStyle}>
+            <User size={18} style={iconStyle} />
+            <input 
+              type="text" 
+              placeholder="Username" 
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              style={inputStyle} 
+              onFocus={(e) => e.target.style.borderColor = THEME.primary}
+              onBlur={(e) => e.target.style.borderColor = THEME.border}
+            />
+          </div>
 
-        <div style={inputContainerStyle}>
-          <Lock size={18} style={iconStyle} />
-          <input 
-            type="password" 
-            placeholder="Password" 
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={inputStyle} 
-            onFocus={(e) => e.target.style.borderColor = THEME.primary}
-            onBlur={(e) => e.target.style.borderColor = THEME.border}
-          />
-        </div>
+          <div style={inputContainerStyle}>
+            <Lock size={18} style={iconStyle} />
+            <input 
+              type="password" 
+              placeholder="Password" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={inputStyle} 
+              onFocus={(e) => e.target.style.borderColor = THEME.primary}
+              onBlur={(e) => e.target.style.borderColor = THEME.border}
+            />
+          </div>
 
-        {/* LOGIN BUTTON */}
-        <button 
-          onClick={handleLogin}
-          style={{ 
-            width: '100%', 
-            padding: '16px', 
-            backgroundColor: THEME.primary, 
-            color: 'white', 
-            border: 'none', 
-            borderRadius: '12px', 
-            fontWeight: '800', 
-            fontSize: '16px', 
-            cursor: 'pointer',
-            boxShadow: `0 4px 14px 0 rgba(37, 99, 235, 0.39)`,
-            marginTop: '10px'
-          }}
-          onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
-          onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-        >
-          Sign In
-        </button>
+          {/* LOGIN BUTTON */}
+          <button 
+            type="submit"
+            style={{ 
+              width: '100%', 
+              padding: '16px', 
+              backgroundColor: THEME.primary, 
+              color: 'white', 
+              border: 'none', 
+              borderRadius: '12px', 
+              fontWeight: '800', 
+              fontSize: '16px', 
+              cursor: 'pointer',
+              boxShadow: `0 4px 14px 0 rgba(37, 99, 235, 0.39)`,
+              marginTop: '10px'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
+            onMouseOut={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+          >
+            Sign In
+          </button>
+          
+        </form>
 
         <div style={{ textAlign: 'center', marginTop: '25px' }}>
           <span style={{ color: THEME.muted, fontSize: '13px' }}>
