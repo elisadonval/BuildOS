@@ -69,9 +69,9 @@ const Welcome = ({ setActiveTab, username, quantities }) => {
         </motion.div>
         
         <h1 style={{ fontSize: '84px', fontWeight: '950', color: THEME.sidebar, lineHeight: '0.9', marginBottom: '32px', letterSpacing: '-4px' }}>
-          Build Smarter. <br />
+          Estimate Clearly. <br />
           <span style={{ background: `linear-gradient(135deg, ${THEME.primary}, ${THEME.success}, #4f46e5)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            Design Without Limits.
+            Manage Confidently.
           </span>
         </h1>
 

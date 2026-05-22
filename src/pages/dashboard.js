@@ -92,27 +92,46 @@ const Dashboard = ({
         <div style={{ ...cardStyle, background: `linear-gradient(135deg, ${THEME.sidebar} 0%, #1e1b4b 100%)`, color: 'white', padding: '30px', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div style={{ position: 'relative', zIndex: 2 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', opacity: 0.7, fontSize: '11px', fontWeight: '900', letterSpacing: '2px' }}>
-                <Timer size={14} /> LIVE PROJECT VALUATION
-              </div>
+              
+              
+            <h2 style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: 0 }}>
+              <Timer color={THEME.green} size={28} /> Detail Estimator
+            </h2>
+            {/* Dropdown work state toggle */}
               {/* Dropdown work state toggle */}
               <select 
                 value={projectStatus} 
                 onChange={(e) => setProjectStatus(e.target.value)}
-                style={{ background: 'rgba(255, 255, 255, 0.1)', color: 'white', border: '1px solid rgba(255, 255, 255, 0.2)', padding: '6px 14px', borderRadius: '20px', fontSize: '11px', fontWeight: '800', outline: 'none', cursor: 'pointer' }}
+                style={{ 
+                  background: 'rgba(255, 255, 255, 0.1)', 
+                  color: projectStatus === 'Active' ? THEME.green : projectStatus === 'Hold' ? THEME.success : projectStatus === 'Stopped' ? THEME.danger : 'white', 
+                  border: '1px solid rgba(255, 255, 255, 0.2)', 
+                  padding: '6px 35px 6px 14px', // 28px right padding keeps text from overlapping our new custom arrow
+                  borderRadius: '20px', 
+                  fontSize: '11px', 
+                  fontWeight: '800', 
+                  outline: 'none', 
+                  cursor: 'pointer',
+                  WebkitAppearance: 'none', // Hides default arrow in Chrome/Safari
+                  MozAppearance: 'none',    // Hides default arrow in Firefox
+                  appearance: 'none',       // Hides default arrow in modern browsers
+                  // Injects a custom white down arrow SVG, positioned 12px from the right, centered vertically:
+                  backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 12px center' // Moves the arrow 12px away from the right edge
+                }}
               >
-                <option value="Active" style={{ color: '#000' }}>ACTIVE</option>
-                <option value="Hold" style={{ color: '#000' }}>HOLD</option>
-                <option value="Stopped" style={{ color: '#000' }}>STOPPED</option>
+                <option value="Active" style={{ color: '#334155' }}>ACTIVE</option>
+                <option value="Hold" style={{ color: '#334155' }}>HOLD</option>
+                <option value="Stopped" style={{ color: '#334155' }}>STOPPED</option>
               </select>
             </div>
-
             <h1 style={{ fontSize: '42px', fontWeight: '950', margin: '25px 0 15px 0', letterSpacing: '-1.5px' }}>
               €{currentTotalValuation.toLocaleString()}
             </h1>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <div style={{ fontSize: '12px', color: isOverBudget ? '#ef4444' : '#10b981', fontWeight: '700', transition: 'color 0.3s' }}>
+              <div style={{ fontSize: '12px', color: isOverBudget ? '#ef4444' : THEME.green, fontWeight: '700', transition: 'color 0.3s' }}>
                 ● BASE BUDGET: €{grandTotal.toLocaleString()} {isOverBudget && '(OVER BUDGET TARGET)'}
               </div>
               {overrunDays > 0 && <div style={{ fontSize: '12px', color: '#ef4444', fontWeight: '700' }}>● RISK EXPOSURE: +€{riskExposure.toLocaleString()}</div>}
@@ -155,7 +174,7 @@ const Dashboard = ({
               {/* Floating Label */}
               <div style={{
                 position: 'absolute', left: `${(optimizer.workerCount / 15) * 100}%`, transform: 'translateX(-50%)',
-                top: '-25px', background: optRes.statusColor, color: 'white', padding: '3px 10px', borderRadius: '4px',
+                top: '-25px', background: optRes.statusColor, color: 'white', padding: '3px 5px', borderRadius: '4px',
                 fontSize: '9px', fontWeight: '900', boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
                 transition: 'all 0.3s ease'
               }}>
@@ -164,37 +183,36 @@ const Dashboard = ({
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px' }}>
             {/* Duration Card */}
-            <div style={{ background: '#fff', border: `1px solid ${THEME.border}`, borderRadius: '16px', padding: '20px', textAlign: 'center' }}>
-               <div style={{ background: '#f8fafc', width: '32px', height: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px auto' }}>
-                 <Clock size={18} color={THEME.muted} />
+            <div style={{ background: '#fff', border: `1px solid ${THEME.border}`, borderRadius: '10px', padding: '12px 15px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                 <Clock size={16} color={THEME.muted} />
+                 <div style={{ fontSize: '10px', fontWeight: '800', color: THEME.muted, whiteSpace: 'nowrap' }}>EST. DURATION</div>
                </div>
-               <div style={{ fontSize: '10px', fontWeight: '800', color: THEME.muted, marginBottom: '4px' }}>EST. DURATION</div>
-               <div style={{ fontSize: '24px', fontWeight: '950', color: THEME.sidebar }}>{optRes.currentDays.toFixed(1)} <span style={{fontSize: '12px'}}>Days</span></div>
+               <div style={{ fontSize: '20px', fontWeight: '950', color: THEME.sidebar, whiteSpace: 'nowrap' }}>{optRes.currentDays.toFixed(1)} <span style={{fontSize: '12px'}}>Days</span></div>
             </div>
 
             {/* Efficiency Card */}
-            <div style={{ background: `${optRes.statusColor}10`, border: `1px solid ${optRes.statusColor}33`, borderRadius: '16px', padding: '20px', textAlign: 'center' }}>
-               <div style={{ background: `${optRes.statusColor}22`, width: '32px', height: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px auto' }}>
-                 <TrendingDown size={18} color={optRes.statusColor} />
+            <div style={{ background: `${optRes.statusColor}10`, border: `1px solid ${optRes.statusColor}33`, borderRadius: '10px', padding: '12px 15px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                 <TrendingDown size={16} color={optRes.statusColor} />
+                 <div style={{ fontSize: '10px', fontWeight: '800', color: optRes.statusColor, whiteSpace: 'nowrap' }}>TIME SAVED</div>
                </div>
-               <div style={{ fontSize: '10px', fontWeight: '800', color: optRes.statusColor, marginBottom: '4px' }}>TIME SAVED</div>
-               <div style={{ fontSize: '24px', fontWeight: '950', color: optRes.statusColor }}>{optRes.timeSaved.toFixed(1)} <span style={{fontSize: '12px'}}>Days</span></div>
+               <div style={{ fontSize: '20px', fontWeight: '950', color: optRes.statusColor, whiteSpace: 'nowrap' }}>{optRes.timeSaved.toFixed(1)} <span style={{fontSize: '12px'}}>Days</span></div>
             </div>
 
             {/* Cost Card */}
-            <div style={{ background: THEME.sidebar, borderRadius: '16px', padding: '20px', textAlign: 'center', color: 'white' }}>
-               <div style={{ background: 'rgba(255,255,255,0.1)', width: '32px', height: '32px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px auto' }}>
-                 <HardHat size={18} color={THEME.success} />
+            <div style={{ background: THEME.sidebar, borderRadius: '10px', padding: '12px 15px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: 'white' }}>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                 <HardHat size={16} color={THEME.success} />
+                 <div style={{ fontSize: '10px', fontWeight: '800', opacity: 0.8, whiteSpace: 'nowrap' }}>SIMULATED COST</div>
                </div>
-               <div style={{ fontSize: '10px', fontWeight: '800', opacity: 0.6, marginBottom: '4px' }}>SIMULATED COST</div>
-               <div style={{ fontSize: '24px', fontWeight: '950', color: 'white' }}>€{optRes.totalCost.toLocaleString()}</div>
+               <div style={{ fontSize: '20px', fontWeight: '950', color: 'white', whiteSpace: 'nowrap' }}>€{optRes.totalCost.toLocaleString()}</div>
             </div>
           </div>
 
         </div>
-
       </div>
 
       {/* --- ROW 2: SITE ENVIRONMENTAL REPORT --- */}
@@ -245,7 +263,7 @@ const Dashboard = ({
         
         {/* Capital Allocation Block */}
         <div style={{ ...cardStyle, padding: '20px' }}>
-          <h3 style={{ margin: '0 0 15px 0', fontSize: '15px', fontWeight: '800' }}>Capital Allocation</h3>
+          <h3 style={{ margin: '0 0 15px 0', fontSize: '16px', fontWeight: '800' }}>Capital Allocation</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {phases.map(phase => (
               <div key={phase.id} style={{ padding: '8px 12px', borderRadius: '10px', background: '#f8fafc', border: '1px solid #f1f5f9' }}>
@@ -264,27 +282,18 @@ const Dashboard = ({
         {/* Project Parameters Card */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           <div style={{ ...cardStyle, padding: '20px' }}>
-            <h3 style={{ fontSize: '14px', fontWeight: '800', margin: '0 0 15px 0' }}>Project Parameters</h3>
+            <h3 style={{ fontSize: '16px', fontWeight: '800', margin: '0 0 15px 0' }}>Project Parameters</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               
               {/* Building Typology Dropdown */}
-              <div style={{ background: '#f1f5f9', padding: '10px', borderRadius: '10px' }}>
+              <div style={{ borderRadius: '10px' }}>
                 <label style={{ fontSize: '9px', fontWeight: '900', color: THEME.muted, display: 'block', marginBottom: '4px' }}>
                   BUILDING TYPOLOGY
                 </label>
                 <select
                   value={projectData.typology || 'Single Family Home'}
                   onChange={(e) => setProjectData({ ...projectData, typology: e.target.value })}
-                  style={{ 
-                    width: '100%', 
-                    border: 'none', 
-                    background: 'transparent', 
-                    fontWeight: '800', 
-                    outline: 'none', 
-                    fontSize: '14px',
-                    color: '#1e293b',
-                    cursor: 'pointer'
-                  }}
+                  style={inputStyle}
                 >
                   <option value="Single Family Home">Single Family Home</option>
                   <option value="Apartment Building">Apartment Building</option>
@@ -300,13 +309,13 @@ const Dashboard = ({
                 { label: 'WALL AREA (m²)', key: 'wallArea' }, 
                 { label: 'WINDOW AREA (m²)', key: 'windowArea' }
               ].map(spec => (
-                <div key={spec.key} style={{ background: '#f1f5f9', padding: '10px', borderRadius: '10px' }}>
+                <div key={spec.key} >
                   <label style={{ fontSize: '9px', fontWeight: '900', color: THEME.muted, display: 'block', marginBottom: '2px' }}>{spec.label}</label>
                   <input 
                     type="number" 
                     value={projectData[spec.key]} 
                     onChange={(e) => setProjectData({...projectData, [spec.key]: parseFloat(e.target.value) || 0})} 
-                    style={{ width: '100%', border: 'none', background: 'transparent', fontWeight: '800', outline: 'none', fontSize: '14px' }} 
+                    style={{ width: '250px', padding: '12px', borderRadius: '10px', border: `1px solid ${THEME.border}`, fontWeight: '700', outline: 'none', background: '#fff', fontSize: '13px', transition: 'all 0.2s'}}
                   />
                 </div>
               ))}
@@ -323,7 +332,7 @@ const Dashboard = ({
           <div style={{ marginBottom: '15px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
               <Target size={18} color={THEME.primary} />
-              <h3 style={{ margin: 0, fontSize: '14px', fontWeight: '900' }}>RESOURCE OPTIMIZER</h3>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '800' }}>Resource Optimizer</h3>
             </div>
             <p style={{ margin: 0, fontSize: '11px', color: THEME.muted }}>Simulate task workflows & crew deployments.</p>
           </div>

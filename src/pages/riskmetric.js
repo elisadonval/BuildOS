@@ -11,6 +11,16 @@ const Metrics = ({
   const [newDescription, setNewDescription] = useState('');
   const [newDailyCost, setNewDailyCost]     = useState('');
 
+  // EFFECT / INITIALIZATION: Pre-load the two default entries if delayMetrics is empty
+  React.useEffect(() => {
+    if (delayMetrics && delayMetrics.length === 0) {
+      setDelayMetrics([
+        { id: 1, type: 'Site Overheads', dailyCost: 200 },
+        { id: 2, type: 'Contractual Penalties', dailyCost: 500 }
+      ]);
+    }
+  }, []);
+
   const addPenalty = () => {
     if (!newDescription.trim() || !newDailyCost) return;
     const newEntry = {

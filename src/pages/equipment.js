@@ -10,7 +10,7 @@ const EquipmentPortal = ({ cardStyle }) => {
           <Truck size={24} color={THEME.primary} /> 
           Equipment Inventory
         </h2>
-        <p style={{ color: THEME.muted }}>Fleet tracking is online.</p>
+        <p style={{ color: THEME.muted }}>Fleet tracking is offline.</p>
       </div>
     </div>
   );

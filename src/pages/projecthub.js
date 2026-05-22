@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, ChevronLeft, FileUp, Settings2, Warehouse, Layout, Layers, FileText, ClipboardList, Gauge } from 'lucide-react';
 import { THEME } from '../constants/theme';
 import libraryData from '../constants/master_dataset.json';
@@ -20,6 +20,30 @@ const ProjectHub = ({
   customProjects = []
 }) => {
  const [activeTaskView, setActiveTaskView] = useState(null);
+
+ // CORRECTED USEEFFECT: 
+ // Triggers if typology is missing OR if GIA is still sitting at 0
+ useEffect(() => {
+  if (!projectData.typology || !projectData.gia || projectData.gia === 0) {
+   // Re-require inside the hook to ensure it resolves, just like your original onChange
+   const { TYPOLOGY_BASELINES } = require('../constants/projectemplate');
+   
+   const defaultTypology = projectData.typology || 'Single Family Home';
+   const baselines = TYPOLOGY_BASELINES?.[defaultTypology] || {};
+   
+   // We use functional state update (prev) to prevent dependency loop issues
+   setProjectData(prev => ({
+    ...prev,
+    typology: defaultTypology,
+    // Safely pull from baselines, but explicitly fall back to your specific numbers
+    gia: baselines.gia || 200,
+    storeys: baselines.storeys || 2,
+    wallArea: baselines.wallArea || 280,
+    windowArea: baselines.windowArea || 7
+   }));
+  }
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, []); // Empty array ensures this strict initialization only happens ONCE on load
 
  const PROJECT_MAP = {
   "Substructure": ["Excavation","Piling & Shoring","Foundations","Water Proofing","Retaining Wall"],
@@ -60,18 +84,17 @@ const ProjectHub = ({
         value={projectData.typology || 'Single Family Home'}
         onChange={(e) => {
           const selectedTypology = e.target.value;
-          // Import baseline pairs from our template maps
           const { TYPOLOGY_BASELINES } = require('../constants/projectemplate');
-          const baselines = TYPOLOGY_BASELINES[selectedTypology] || { gia: 0, storeys: 1 };
+          // If a new typology is selected, default to 0 to let your engine recalculate
+          const baselines = TYPOLOGY_BASELINES?.[selectedTypology] || { gia: 0, storeys: 1, wallArea: 0, windowArea: 0 };
           
-          // Clear manual values to allow the calculation engine to recalculate wall/window areas fresh
           setProjectData({
             ...projectData,
             typology: selectedTypology,
             gia: baselines.gia,
             storeys: baselines.storeys,
-            wallArea: 0,
-            windowArea: 0
+            wallArea: baselines.wallArea || 0,
+            windowArea: baselines.windowArea || 0
           });
         }}
         style={{ border: `1px solid ${THEME.border}`, borderRadius: '8px', padding: '8px', fontWeight: '700', outline: 'none', backgroundColor: '#fff', height: '38px', cursor: 'pointer' }}
@@ -94,7 +117,7 @@ const ProjectHub = ({
      </label>
      <input
       type="number"
-      value={derivedParams[field.key] || 0}
+      value={derivedParams[field.key] || projectData[field.key] || 0}
       onChange={(e) => setProjectData({...projectData, [field.key]: parseFloat(e.target.value) || 0})}
       style={{ border: `1px solid ${THEME.border}`, borderRadius: '8px', padding: '8px', fontWeight: '700', outline: 'none' }}
      />

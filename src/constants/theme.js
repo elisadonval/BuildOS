@@ -9,5 +9,6 @@ export const THEME = {
   medium: '#f4940d',
   lightyellow: '#fff5ca',
   success: '#ffcd28',
-  black: '#000000'
+  black: '#000000',
+  green:'#10b981'
 };

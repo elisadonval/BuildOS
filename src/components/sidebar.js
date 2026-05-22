@@ -42,7 +42,7 @@ const Sidebar = ({ activeTab, setActiveTab, setViewMode, isExpanded, setIsExpand
         </button>
 
         <button onClick={() => setActiveTab('Dashboard')} style={btnStyle('Dashboard')}>
-          <LayoutGrid size={22}/> {isExpanded && "Dashboard"}
+          <LayoutGrid size={22}color={activeTab === 'Dashboard' ? THEME.green : 'white'}/> {isExpanded && "Dashboard"}
         </button>
         
         <button onClick={() => setActiveTab('Resources')} style={btnStyle('Resources')}>
