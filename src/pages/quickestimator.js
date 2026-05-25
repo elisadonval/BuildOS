@@ -120,29 +120,27 @@ const QuickEstimator = ({ cardStyle, grandTotal = 0, phases = [] }) => {
     const standardTotalDays = currentDataset.baseDays * timelineScaleFactor;
     // Calculate final project absolute timeline length 
     const modifiedTotalDays = Math.max(7, Math.round(standardTotalDays - totalScheduleNetDaysShift));
-    const totalWeeks = Math.ceil(modifiedTotalDays / 7);
     
-    // Add dynamic labor choices to structural building estimates
+    // --- FIXED TIMELINE LOGIC ---
+    // Use your requested generous layout (Totaling exactly 71 weeks)
+    const scheduleStages = [
+      { name: 'Concept / Pre-design', weeks: 8, color: '#6366f1' },
+      { name: 'Design Development', weeks: 16, color: '#8b5cf6' },
+      { name: 'Permitting / Approvals', weeks: 12, color: '#ec4899' },
+      { name: 'Procurement', weeks: 8, color: '#f59e0b' },
+      { name: 'Construction', weeks: 24, color: THEME.primary },
+      { name: 'Handover / Snagging', weeks: 3, color: THEME.success }
+    ];
+
+    const totalWeeks = 71; 
     const finalBudget = initialBudget + laborFinancialAdjustments;
 
     const start = new Date(params.startDate);
     const handoverDate = new Date(start);
-    handoverDate.setDate(start.getDate() + modifiedTotalDays);
-
-    const scheduleStages = [
-      { name: 'Concept / Pre-design', pct: 0.10, color: '#6366f1' },
-      { name: 'Design Development', pct: 0.15, color: '#8b5cf6' },
-      { name: 'Permitting / Approvals', pct: 0.15, color: '#ec4899' },
-      { name: 'Procurement', pct: params.material === 'Steel' ? 0.20 : 0.10, color: '#f59e0b' },
-      { name: 'Construction', pct: params.material === 'Timber' ? 0.35 : 0.45, color: THEME.primary },
-      { name: 'Handover / Snagging', pct: 0.05, color: THEME.success }
-    ].map(stage => ({
-      ...stage,
-      weeks: Math.max(1, Math.round(totalWeeks * stage.pct))
-    }));
+    handoverDate.setDate(start.getDate() + (totalWeeks * 7));
 
     return { 
-      finalBudget, estHours, totalWeeks, totalDays: modifiedTotalDays,
+      finalBudget, estHours, totalWeeks, totalDays: (totalWeeks * 7),
       scheduleStages, handoverDate, optimizedPhases, totalScheduleNetDaysShift 
     };
   }, [params, phaseStaffing]);
@@ -210,7 +208,6 @@ const QuickEstimator = ({ cardStyle, grandTotal = 0, phases = [] }) => {
 
   const labelStyle = { fontSize: '10px', fontWeight: '800', color: THEME.muted, display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' };
   const inputStyle = { width: '100%', padding: '12px', borderRadius: '10px', border: `1px solid ${THEME.border}`, fontWeight: '700', outline: 'none', background: '#fff', fontSize: '13px' };
-  const editableMetricStyle = { ...inputStyle, background: '#f0f9ff', borderColor: '#bae6fd' };
   const readOnlyMetricStyle = { ...inputStyle, background: '#e2e8f0', borderColor: '#cbd5e1', color: '#64748b', cursor: 'not-allowed' };
 
   return (
@@ -232,48 +229,48 @@ const QuickEstimator = ({ cardStyle, grandTotal = 0, phases = [] }) => {
         </div>
       </div>
 
-        {/* PARAMETERS GRID */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '25px' }}>
-                <div style={cardStyle}>
-                  <h3 style={{ fontSize: '16px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Ruler size={16} color={THEME.primary} /> Project Parameters
-                  </h3>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    
-                    {/* ROW 1: GROSS M2 & GROSS M3 */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '180px 180px', gap: '50px' }}>
-                      <div>
-                        <label style={labelStyle}><Maximize size={12}/> Gross GIA (m²)</label>
-                        <input type="number" value={params.gia} onChange={(e) => updateParam('gia', parseFloat(e.target.value) || 0)} style={inputStyle} />
-                      </div>
-                      <div>
-                        <label style={labelStyle}><Box size={12}/> Gross Vol (m³)</label>
-                        <input type="number" value={params.volume} onChange={(e) => updateParam('volume', parseFloat(e.target.value) || 0)} style={inputStyle} />
-                      </div>
-                    </div>
+      {/* PARAMETERS GRID */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '25px' }}>
+        <div style={cardStyle}>
+          <h3 style={{ fontSize: '16px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Ruler size={16} color={THEME.primary} /> Project Parameters
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            
+            {/* ROW 1: GROSS M2 & GROSS M3 */}
+            <div style={{ display: 'grid', gridTemplateColumns: '180px 180px', gap: '50px' }}>
+              <div>
+                <label style={labelStyle}><Maximize size={12}/> Gross GIA (m²)</label>
+                <input type="number" value={params.gia} onChange={(e) => updateParam('gia', parseFloat(e.target.value) || 0)} style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}><Box size={12}/> Gross Vol (m³)</label>
+                <input type="number" value={params.volume} onChange={(e) => updateParam('volume', parseFloat(e.target.value) || 0)} style={inputStyle} />
+              </div>
+            </div>
         
-                    {/* ROW 2: M2/FLOOR & NUMBER OF STOREYS */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '180px 180px', gap: '50px' }}>
-                      <div>
-                        <label style={labelStyle}><Maximize size={12}/> m² / Floor</label>
-                        <input type="text" disabled value={`${m2PerFloor.toFixed(1)} m²`} style={readOnlyMetricStyle} />
-                      </div>
-                      <div>
-                        <label style={labelStyle}><Layers size={12}/> Storeys</label>
-                        <input type="number" min="1" value={params.storeys} onChange={(e) => updateParam('storeys', Math.max(1, parseInt(e.target.value) || 1))} style={inputStyle} />
-                      </div>
-                    </div>
+            {/* ROW 2: M2/FLOOR & NUMBER OF STOREYS */}
+            <div style={{ display: 'grid', gridTemplateColumns: '180px 180px', gap: '50px' }}>
+              <div>
+                <label style={labelStyle}><Maximize size={12}/> m² / Floor</label>
+                <input type="text" disabled value={`${m2PerFloor.toFixed(1)} m²`} style={readOnlyMetricStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}><Layers size={12}/> Storeys</label>
+                <input type="number" min="1" value={params.storeys} onChange={(e) => updateParam('storeys', Math.max(1, parseInt(e.target.value) || 1))} style={inputStyle} />
+              </div>
+            </div>
         
-                    <div style={{ height: '1px', background: THEME.border, margin: '5px 0' }} />
-                    
-                    {/* PERIPHERAL MEASUREMENTS */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '180px 180px', gap: '50px' }}>
-                      <div><label style={labelStyle}><Edit3 size={12}/> Building Height (m)</label><input type="number" value={params.height} onChange={(e) => updateParam('height', parseFloat(e.target.value))} style={inputStyle} /></div>
-                      <div><label style={labelStyle}><Home size={12}/> Unit/Room Count</label><input type="number" value={params.units} onChange={(e) => updateParam('units', parseInt(e.target.value))} style={inputStyle} /></div>
-                    </div>
+            <div style={{ height: '1px', background: THEME.border, margin: '5px 0' }} />
+            
+            {/* PERIPHERAL MEASUREMENTS */}
+            <div style={{ display: 'grid', gridTemplateColumns: '180px 180px', gap: '50px' }}>
+              <div><label style={labelStyle}><Edit3 size={12}/> Building Height (m)</label><input type="number" value={params.height} onChange={(e) => updateParam('height', parseFloat(e.target.value))} style={inputStyle} /></div>
+              <div><label style={labelStyle}><Home size={12}/> Unit/Room Count</label><input type="number" value={params.units} onChange={(e) => updateParam('units', parseInt(e.target.value))} style={inputStyle} /></div>
+            </div>
         
-                  </div>
-                </div>
+          </div>
+        </div>
 
         {/* TYPOLOGY SETUP & ORIGINAL PROJECTED HANDOVER PLACEHOLDER */}
         <div style={cardStyle}>
@@ -291,15 +288,15 @@ const QuickEstimator = ({ cardStyle, grandTotal = 0, phases = [] }) => {
           </div>
           <div style={{ marginBottom: '20px' }}><label style={labelStyle}><Calendar size={12}/> Projected Start Date</label><input type="date" value={params.startDate} onChange={(e) => updateParam('startDate', e.target.value)} style={inputStyle} /></div>
           <div style={{ marginBottom: '20px' }}>
-            <label style={labelStyle}>Complexity Level</label>
+            <label style={labelStyle}>Structural Material</label>
             <div style={{ display: 'flex', gap: '5px' }}>
-              {['Low', 'Medium', 'High'].map(lvl => (
-                <button key={lvl} onClick={() => updateParam('complexity', lvl)} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: `1px solid ${params.complexity === lvl ? THEME.primary : THEME.border}`, background: params.complexity === lvl ? THEME.primary : 'white', color: params.complexity === lvl ? 'white' : THEME.sidebar, fontWeight: '700', fontSize: '10px', cursor: 'pointer' }}>{lvl}</button>
+              {['Concrete', 'Steel', 'Timber'].map(lvl => (
+                <button key={lvl} onClick={() => updateParam('material', lvl)} style={{ flex: 1, padding: '10px', borderRadius: '8px', border: `1px solid ${params.material === lvl ? THEME.primary : THEME.border}`, background: params.material === lvl ? THEME.primary : 'white', color: params.material === lvl ? 'white' : THEME.sidebar, fontWeight: '700', fontSize: '10px', cursor: 'pointer' }}>{lvl}</button>
               ))}
             </div>
           </div>
           
-          {/* Handover original block - Unaltered location */}
+          {/* Handover block aligned to the fixed 71 weeks timeline total */}
           <div style={{ padding: '15px', background: THEME.sidebar, borderRadius: '12px', color: 'white', textAlign: 'center' }}>
             <div style={{ fontSize: '10px', fontWeight: '800', opacity: 0.6, marginBottom: '5px' }}>PROJECTED HANDOVER</div>
             <div style={{ fontSize: '20px', fontWeight: '800' }}>{results.handoverDate.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })}</div>
@@ -333,13 +330,6 @@ const QuickEstimator = ({ cardStyle, grandTotal = 0, phases = [] }) => {
       <div style={cardStyle}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
           <h3 style={{ fontSize: '14px', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}><Calendar size={18} color={THEME.primary} /> Calculated Project Timeline</h3>
-          {results.totalScheduleNetDaysShift !== 0 && (
-            <div style={{ fontSize: '11px', fontWeight: '800', padding: '4px 10px', borderRadius: '6px', background: results.totalScheduleNetDaysShift > 0 ? '#e8f5e9' : '#fff5f5', color: results.totalScheduleNetDaysShift > 0 ? '#2e7d32' : '#c53030' }}>
-              {results.totalScheduleNetDaysShift > 0 
-                ? `🚀 Optimization: Saved ${results.totalScheduleNetDaysShift} Days total` 
-                : `⚠️ Constraints: Added ${Math.abs(results.totalScheduleNetDaysShift)} Days behind baseline`}
-            </div>
-          )}
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '15px' }}>
           {results.scheduleStages.map((stage, idx) => (
@@ -417,7 +407,7 @@ const QuickEstimator = ({ cardStyle, grandTotal = 0, phases = [] }) => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                   <label style={{ ...labelStyle, marginBottom: 0 }}>Active Deployment Crew</label>
                   <span style={{ fontSize: '14px', fontWeight: '900', color: activeOptRes?.statusColor }}>
-                    {activeOptRes?.workerCount} Men
+                    {activeOptRes?.workerCount} Workers
                   </span>
                 </div>
                 <input 

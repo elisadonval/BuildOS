@@ -86,7 +86,7 @@ const Dashboard = ({
     <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', animation: 'fadeIn 0.6s ease-out' }}>
       
       {/* --- ROW 1: VALUATION & RESOURCE ACCELERATION MODULE --- */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.8fr', gap: '20px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1.9fr', gap: '20px' }}>
         
         {/* Left Side: Live Project Valuation Card */}
         <div style={{ ...cardStyle, background: `linear-gradient(135deg, ${THEME.sidebar} 0%, #1e1b4b 100%)`, color: 'white', padding: '30px', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
